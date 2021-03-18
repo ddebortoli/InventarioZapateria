@@ -43,7 +43,7 @@ class logInScreen(Tk):
         except:
             print("Fallo al conectarse a la base de datos") 
     
-class App2(Tk):
+class viewScreen(Tk):
     
     def __init__(self,accessLevel):
         Tk.__init__(self)
@@ -52,10 +52,10 @@ class App2(Tk):
         self.marca = StringVar()
         self.precio = StringVar()
         self.cantidad = StringVar()
-
+        self.operationName = StringVar()
         
         self.title('Pantalla de inicio')
-        self.geometry('320x240')
+        self.geometry('500x500')
         
         self.addItem = Button(self,text="Agregar articulo",command=self.addItemView,padx=10)
         self.addItem.place(x=20,y=10)
@@ -83,18 +83,24 @@ class App2(Tk):
 
     def on_entry_validate(self):
         "Funcion que valida los campos enteros"
-        numeros = [self.cantidad.get(),self.precio.get()]
+        numeros = {'Cantidad':self.cantidad.get(),'Precio':self.precio.get()}
         try:
-            for i in numeros:
-                x = int(i)
+            for campo in numeros:
+                x = int(numeros[campo])
         except ValueError:
-            messagebox.showinfo("Parametro de entrada invalido", i +" debe ser de tipo numerico")
+            messagebox.showinfo("Parametro de entrada invalido", campo +" debe ser de tipo numerico")
         else:
-            self.insertNewItem(self.zapatilla.get(),self.marca.get(),self.precio.get(),self.cantidad.get())
-     
+            if (self.operationName == 'addItem'):
+                operation = DataBase("",self.zapatilla.get(),self.marca.get(),self.cantidad.get(),self.precio.get()).addItemsToDB()
+            elif(self.operationName == 'deleteItem'):
+                operation = DataBase("",self.zapatilla.get(),self.marca.get(),self.cantidad.get(),self.precio.get()).deleteItemFromDB()
+            elif(self.operationName == 'addSale'):
+                operation = DataBase("",self.zapatilla.get(),self.marca.get(),self.precio.get()).addSaleToDB(self.cantidad.get())
+                
     def addItemView(self):
         "Funcion que abre la ventana de agregar Ventas"
         addItemWindow = Toplevel(self)
+        addItemWindow.title("Agregar articulo")
         
         zapatillaLabel = Label(addItemWindow,text="Nombre zapatilla:").grid(row=0,column=0)
         zapatillaInput = Entry(addItemWindow,textvariable=self.zapatilla).grid(row = 0,column=1)
@@ -107,11 +113,14 @@ class App2(Tk):
         
         cantidadLabel = Label(addItemWindow,text="Ingrese cantidad:").grid(row=3,column=0)
         cantidadInput = Entry(addItemWindow,textvariable=self.cantidad).grid(row=3,column=1)
-              
-        buttonLogIn = Button(addItemWindow,text = 'Registrar producto').grid(row=4 ,column=0)
         
+        self.operationName = 'addItem'
+        buttonLogIn = Button(addItemWindow,text ='Registrar producto',command=self.on_entry_validate).grid(row=5 ,column=1)
+       
     def checkItemsView(self):
+        "Funcion que devuelve un listado de articulos"
         checkItemWidow = Toplevel(self)
+        checkItemWidow.title("Listado de articulos")
         
         treeView = ttk.Treeview(checkItemWidow)
         treeView.grid(columnspan=2)
@@ -124,54 +133,39 @@ class App2(Tk):
         treeView.heading("Precio", text="Precio")
         treeView.heading("Costo", text="Costo") 
         
+        self.zapatilla = 'None'
+        self.marca = 'None'
+        self.precio = 'None'
+        self.cantidad = 'None'
+        
         #Mostrar los datos
-        tuples = [(1, "Name1"),(2, "Name2")]
+        tuples = DataBase("",self.zapatilla,self.marca,self.precio,self.cantidad).getItemsFromDB()
+        
         index = iid = 0
         for row in tuples:
             treeView.insert("", index, iid, values=row)
             index = iid = index + 1
-
-
-        
-        self.zapatilla = StringVar()
-        self.marca = StringVar()
-        self.precio = StringVar()
-        self.cantidad = StringVar()
-        
-        
-        #zapatillaLabel = Label(checkItemWidow,text="Nombre").place(x=10,y=10)
-        #zapatillaInput = Entry(checkItemWidow,textvariable=self.zapatilla).place(x=150,y=10)
-        
-        #marcaLabel = Label(checkItemWidow,text="Marca").place(x=60,y=10)
-        #marcaInput = Entry(checkItemWidow,textvariable=self.marca).place(x=150,y=50)
-    
-    
-        #precioLabel = Label(checkItemWidow,text="Precio").place(x=110,y=10)
-        #precioInput = Entry(checkItemWidow,textvariable=self.precio).place(x=150,y=110)
-        
-        #cantidadLabel = Label(checkItemWidow,text="Cantidad").place(x=160,y=10)
-        #cantidadInput = Entry(checkItemWidow,textvariable=self.cantidad).place(x=150,y=150)
-             
-        #buttonLogIn = Button(checkItemWidow,text = 'Registrar producto',command=self.on_entry_validate).place(x=120,y=200)
         
     def deleteItemView(self):
         addItemWindow = Toplevel(self)
-        self.geometry = ("600x600")
+        addItemWindow.title("Eliminar articulo")        
+        zapatillaLabel = Label(addItemWindow,text="Nombre zapatilla:").grid(row=0,column=0)
+        zapatillaInput = Entry(addItemWindow,textvariable=self.zapatilla).grid(row=0,column=1)
         
-        zapatillaLabel = Label(addItemWindow,text="Nombre zapatilla:").place(x=10,y=10)
-        zapatillaInput = Entry(addItemWindow,textvariable=self.zapatilla).place(x=150,y=10)
-        
-        marcaLabel = Label(addItemWindow,text="Ingrese marca:").place(x=10,y=50)
-        marcaInput = Entry(addItemWindow,textvariable=self.marca).place(x=150,y=50)
+        marcaLabel = Label(addItemWindow,text="Ingrese marca:").grid(row=1,column=0)
+        marcaInput = Entry(addItemWindow,textvariable=self.marca).grid(row=1,column=1)
     
-        precioLabel = Label(addItemWindow,text="Ingrese precio:").place(x=10,y=110)
-        precioInput = Entry(addItemWindow,textvariable=self.precio).place(x=150,y=110)
+        precioLabel = Label(addItemWindow,text="Ingrese precio:").grid(row=2,column=0)
+        precioInput = Entry(addItemWindow,textvariable=self.precio).grid(row=2,column=1)
         
-        cantidadLabel = Label(addItemWindow,text="Ingrese cantidad:").place(x=10,y=150)
-        cantidadInput = Entry(addItemWindow,textvariable=self.cantidad).place(x=150,y=150)
-              
-        buttonLogIn = Button(addItemWindow,text = 'Registrar producto').place(x=120,y=200)
+        cantidadLabel = Label(addItemWindow,text="Ingrese cantidad:").grid(row=3,column=0)
+        cantidadInput = Entry(addItemWindow,textvariable=self.cantidad).grid(row=3,column=1)
+        
+        self.operationName = 'deleteItem'      
+        buttonLogIn = Button(addItemWindow,text = 'Borrar producto',command=self.on_entry_validate).grid(row=4,column=0)
+    
     def addSaleView(self):
+        "Funcion que agrega la visual de ventas"
         addItemWindow = Toplevel(self)
         addItemWindow.geometry = ("600x600")
         
@@ -186,8 +180,9 @@ class App2(Tk):
         
         cantidadLabel = Label(addItemWindow,text="Ingrese cantidad:").place(x=10,y=150)
         cantidadInput = Entry(addItemWindow,textvariable=self.cantidad).place(x=150,y=150)
-              
-        buttonLogIn = Button(addItemWindow,text = 'Registrar producto').place(x=120,y=200)
+        
+        self.operationName = 'addSale'      
+        buttonLogIn = Button(addItemWindow,text = 'Registrar venta',command=self.on_entry_validate).place(x=120,y=200)
 
 class DataBase():
     def __init__(self,code=None,name=None,mark=None,price=None,amount=None):
@@ -203,7 +198,6 @@ class DataBase():
             'Precio':str(price),
             'Cantidad':str(amount)
             }
-
             
     def getItemsFromDB(self):
         "Funcion que obtiene registros de la base de datos en base a la cantidad de filtros enviados"
@@ -214,8 +208,8 @@ class DataBase():
                     query = query + " AND " + str(clave) + " = '" + str(self.lista[clave] + "'")
                 except:
                     print("Error en:" + query)
-                    
-        result = self.conexion.execute(query).fetchall()        
+        
+        result = self.conexion.execute(query).fetchall()  
         return result
             
     def addItemsToDB(self):
@@ -226,15 +220,32 @@ class DataBase():
         else:
             query = "INSERT INTO Articulos(NombreZapato,Marca,Precio,Cantidad)VALUES(?,?,?,?)"
             datos = (str(self.name),str(self.mark),self.price,self.amount)
-            conn = sqlite3.Connection("inventarioHM.db")
-            conn.execute(query,datos)  
-            conn.commit() 
+            self.conexion.execute(query,datos)  
+            self.conexion.commit() 
             itemExist = self.getItemsFromDB() 
             if itemExist:
                 messagebox.showinfo("Exito","Articulo ingresado exitosamente")
             else:
                 messagebox.showinfo("Error al agregar","Revise su articulo y vuelva a intentar, si el error persiste contacte con un administrador")
 
+    def addSaleToDB(self,amountOfItem):
+        "funcion que resta articulos a la base de datos"
+        selectItem = self.getItemsFromDB()
+        if selectItem:
+            if selectItem[0][4] < int(amountOfItem):
+                messagebox.showinfo("Error al actualizar","La cantidad seleccionada es superior al stock vigente")
+            else:
+                try:
+                    query = "UPDATE Articulos SET Cantidad = Cantidad - " + str(amountOfItem)        
+                    print(query)
+                    self.conexion.execute(query)  
+                    self.conexion.commit()
+                    messagebox.showinfo("Exito al registrar","La venta se ha realizado exitosamente") 
+                except:
+                    messagebox.showinfo("Error al actualizar","Contacte con un administrador para mas detalles")
+        else:
+            messagebox.showinfo("Error al actualizar","El registro ingresado no existe en el stock vigente")
+                
     def deleteItemFromDB(self):
         "Funcion que elimina un registro de la base de datos"
         query = "DELETE FROM Articulos WHERE Id NOT NULL"
@@ -248,18 +259,21 @@ class DataBase():
             else:
                 cont = cont + 1
         if (cont < 4):
-            conn = sqlite3.Connection("inventarioHM.db")
-            conn.execute(query)  
-            conn.commit() 
+            self.conexion.execute(query)  
+            self.conexion.commit()
+            messagebox.showinfo("Exito al borrar","Articulo borrado exitosamente") 
         else:
             messagebox.showinfo("Error al borrar","Se debe especificar por lo menos un valor")
+
 if __name__ == '__main__':
 
-    #app1 = logInScreen()
+    app1 = logInScreen()
 
-#    if app1.logged:
-#        App2(app1.access)
+    if app1.logged:
+        viewScreen(app1.access)
     
+    DataBase.conexion.close()
+        
     #Prueba para obtener datos filtrando por uno o mas campos
     #test1GetDataByFilter = DataBase(None,None,None,None).getItemsFromDB()
     
@@ -267,11 +281,14 @@ if __name__ == '__main__':
     #test2InsertDataThatAlreadyExist = DataBase("","Adidas sport II","Adidas","5000","4").addItemsToDB()
     
     #Prueba para insertar datos que no existen, deben generarse nuevos datos todo el tiempo
-    #test3InsertDataThatDoesntExist = DataBase("","1","DataAlazar","5000","4").addItemsToDB()
+    #test3InsertDataThatDoesntExist = DataBase("",'Hight sport','Adidas','1000','19').addItemsToDB()
     
     #Prueba para eliminar datos por filtracion
     #test4deleteFromDB = DataBase("","1","DataAlazar","5000","4").deleteItemFromDB()
 
     #Prueba para eliminar datos por filtracion, al estar vacio devuelve error
-    #test4deleteFromDB = DataBase().deleteItemFromDB()
+    #test5deleteFromDB = DataBase().deleteItemFromDB()
+    
+    #Prueba para registrar una venta
+    #test6UpdateTable = DataBase("",'New Ballance','New Ballance','1000').addSaleToDB(5)
     
