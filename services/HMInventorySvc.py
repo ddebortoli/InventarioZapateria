@@ -20,11 +20,23 @@ class HMInventory():
             return self.OBTENER_ARTICULOS()
         elif operation == 'ELIMINAR_ARTICULOS':
             return self.ELIMINAR_ARTICULOS()
-        elif operation == 'REGISTRAR_VENTA':
-            return self.REGISTRAR_VENTA()
+        else:
+            return print("La operacion enviada es invalida")
         
     def AGREGAR_ARTICULO(self):
-        pass
+        datos = (str(self.name),str(self.mark),str(self.price),str(self.amount))
+        try:
+            self.error = 'Precio'
+            int(self.price)
+            self.error = 'Cantidad'
+            int(self.amount)
+        except:
+            print(self.error + " debe ser de tipo entero")
+            return False
+        query = "INSERT INTO Articulos(NombreZapato,Marca,Precio,Cantidad)VALUES" + str(datos)
+        print(query)
+        return query or False
+
     def OBTENER_ARTICULOS(self):
         query = "SELECT * FROM Articulos WHERE Id NOT NULL"
         for clave in self.lista:
@@ -35,8 +47,16 @@ class HMInventory():
                     print("Error en:" + query) 
         return query or False
     def ELIMINAR_ARTICULOS(self):
-        pass
-    def REGISTRAR_VENTA(self):
-        pass
+        query = "DELETE FROM Articulos WHERE Id NOT NULL"
+        if len(self.name) < 1:
+            print("El nombre del zapato es obligatorio para esta operacion!")
+            return False
+        for clave in self.lista:
+            if self.lista[clave] not in ['None',None,''] :
+                try:
+                    query = query + " AND " + str(clave) + " = '" + str(self.lista[clave] + "'")
+                except:
+                    print("Error en:" + query) 
+        return query or False
     
 #HMInventory(None,None,None,'1500','OBTENER_ARTICULOS').selectOperation()
