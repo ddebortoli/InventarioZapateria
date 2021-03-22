@@ -13,7 +13,7 @@ class execQuery():
             connection.commit()
             return result
         except sqlite3.IntegrityError:
-            print("Este articulo ya existe en la base de datos!")
+            print("This article already exists in the database!")
             return False
         finally:
             connection.close()

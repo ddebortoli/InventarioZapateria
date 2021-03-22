@@ -13,17 +13,19 @@ class HMInventory():
                  }
         
     def selectOperation(self):
+        "Function that executes an operation based on the request received"
         operation = self.operation
-        if operation == 'AGREGAR_ARTICULO':
-            return self.AGREGAR_ARTICULO()
-        elif operation == 'OBTENER_ARTICULOS':
-            return self.OBTENER_ARTICULOS()
-        elif operation == 'ELIMINAR_ARTICULOS':
-            return self.ELIMINAR_ARTICULOS()
+        if operation == 'ADD_ITEM':
+            return self.ADD_ITEM()
+        elif operation == 'GET_ITEMS':
+            return self.GET_ITEMS()
+        elif operation == 'DELETE_ITEM':
+            return self.DELETE_ITEM()
         else:
-            return print("La operacion enviada es invalida")
-        #Prueba
-    def AGREGAR_ARTICULO(self):
+            return print("Invalid or misspelled operation")
+        
+    def ADD_ITEM(self):
+        "Function that validates the entered data and builds the query based on the number of parameters"
         datos = (str(self.name),str(self.mark),str(self.price),str(self.amount))
         try:
             self.error = 'Precio'
@@ -31,32 +33,33 @@ class HMInventory():
             self.error = 'Cantidad'
             int(self.amount)
         except:
-            print(self.error + " debe ser de tipo entero")
+            print(self.error + " must be integer type")
             return False
         query = "INSERT INTO Articulos(NombreZapato,Marca,Precio,Cantidad)VALUES" + str(datos)
         print(query)
         return query or False
 
-    def OBTENER_ARTICULOS(self):
+    def GET_ITEMS(self):
+        "Function that validates the data and generates the query to enter an article to the database"
         query = "SELECT * FROM Articulos WHERE Id NOT NULL"
         for clave in self.lista:
             if self.lista[clave] not in ['None',None,''] :
                 try:
                     query = query + " AND " + str(clave) + " = '" + str(self.lista[clave] + "'")
                 except:
-                    print("Error en:" + query) 
+                    print("Error on:" + query) 
         return query or False
-    def ELIMINAR_ARTICULOS(self):
+    
+    def DELETE_ITEM(self):
+        "Function that validates the data and prepares a query to delete an item"
         query = "DELETE FROM Articulos WHERE Id NOT NULL"
         if len(self.name) < 1:
-            print("El nombre del zapato es obligatorio para esta operacion!")
+            print("Name is a mandatory parameter for this operation!")
             return False
         for clave in self.lista:
             if self.lista[clave] not in ['None',None,''] :
                 try:
                     query = query + " AND " + str(clave) + " = '" + str(self.lista[clave] + "'")
                 except:
-                    print("Error en:" + query) 
+                    print("Error on:" + query) 
         return query or False
-    
-#HMInventory(None,None,None,'1500','OBTENER_ARTICULOS').selectOperation()
