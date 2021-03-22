@@ -22,7 +22,7 @@ class HMInventory():
             return self.ELIMINAR_ARTICULOS()
         else:
             return print("La operacion enviada es invalida")
-        
+        #Prueba
     def AGREGAR_ARTICULO(self):
         datos = (str(self.name),str(self.mark),str(self.price),str(self.amount))
         try:
